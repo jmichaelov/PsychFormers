@@ -36,12 +36,12 @@ Required and optional arguments for `psychformers.py` will be explained below.
 ### Input Format
 The format of the input files must follow a strict form. Firstly, the input file must be a plain text file. Each individual stimulus item should be provided on a separate line, with the target&mdash;that is, the word or sequence of words for which the metric is to be calculated&mdash;surrounded by asterisks (`*`). For example, such a file may contain lines like the following:
 
-        ```
-        ...
-        The metric to be calculated is *surprisal*.
-        Other *metrics* could also be calculated.
-        ...
-        ```
+```
+...
+The metric to be calculated is *surprisal*.
+Other *metrics* could also be calculated.
+...
+```
 In this case, PsychFormers will calculate the relevant metric(s) for the words `surprisal` and `metrics` based on the context of the line on which each.
 
 For clarity, stimulus files have been given the `.stims` extension, but as long as the file is a plain text file, any extension should work with PsychFormers.
