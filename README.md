@@ -104,7 +104,7 @@ The first version of this code was released [here](https://github.com/jmichaelov
 ```
 @article{michaelov_2022_AnaphoricZeroPronouns,
   title={Do language models make human-like predictions about the coreferents of Italian anaphoric zero pronouns?},
-  author={Michaelov, James A and Bergen, Benjamin K},
+  author={Michaelov, James A. and Bergen, Benjamin K.},
   journal={arXiv preprint arXiv:2208.14554},
   year={2022}
 }
