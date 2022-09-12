@@ -1,6 +1,6 @@
 # PsychFormers: Tools for calculating psycholinguistically-relevant metrics of language statistics using transformer language models
 
-This repository contains a Python script (`psychformers.py`) that allows the user to use transformer neural network language models (via the `transformers` Python package) to calculate metrics that are relevant to psycholinguistic experiments. Currently, only the `surprisal` metric is supported.
+This repository contains a command-line Python script (`psychformers.py`) that allows the user to use transformer neural network language models (via the `transformers` Python package) to calculate metrics that are relevant to psycholinguistic experiments. Currently, only the `surprisal` metric is supported.
 
 An additional script (`psychformers_gpt3.py`) is also included that allows the user to calculate the `surprisal` metric for a given word or sequence of words using GPT-3.
 
