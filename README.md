@@ -80,7 +80,6 @@ The file itself is a tab-separated values file, with five columns:
 ### Optional Arguments
 * `--following_context` (`-f`): Whether or not to include the following context&mdash;that is, anything following the target&mdash;when calculating surprisal. The default is `False`; including this argument will switch this to `True`. Note that if you include this argument, only the results for masked language models will be affected, as it is not possible for autoregressive (`causal`) models to use the following context for prediction.
 * `--primary_decoder` (`-d`): For models with both `masked` and `causal` versions, specify which one to use as the default&mdash;either `masked` or `causal` (default is `masked`). This is mostly used to select causally-masked versions of masked language models.
-* `--seed`: Choose a random seed (default is `2022`).
 
 
 ## PsychFormers for GPT-3
