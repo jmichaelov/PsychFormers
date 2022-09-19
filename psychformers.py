@@ -158,9 +158,9 @@ def create_and_run_models(model_list,stimulus_file_list,metric_list,primary_deco
                 if model and tokenizer:
                     try:
                         if model_type=="causal":
-                            process_stims_causal(model,tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_causal(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                         elif model_type=="masked":
-                            process_stims_masked(model,tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_masked(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                     except:
                         print("Cannot run either a masked or causal form of {0}".format(model_name))
             except:
@@ -206,11 +206,11 @@ def create_and_run_models(model_list,stimulus_file_list,metric_list,primary_deco
                 if model and tokenizer:
                     try:
                         if model_type=="causal":
-                            process_stims_causal(model,tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_causal(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                         elif model_type=="masked":
-                            process_stims_masked(model,tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_masked(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                         elif model_type=="causal_mask":
-                            process_stims_causal_mask(model,tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_causal_mask(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                                             
                     except:
                         print("Cannot run either a causal or masked form of {0}".format(model_name))
@@ -255,7 +255,7 @@ def get_surprisal_causal(model,tokenizer,preceding_context,following_words,targe
     all_probabilities = []
     for i in range(len(target_words)):
         current_target = target_words[i]
-        input = torch.LongTensor([current_context])
+        input = torch.LongTensor([current_context]).to("cuda" if torch.cuda.is_available() else "cpu")
         with torch.no_grad():
             next_token_logits = model(input, return_dict=True).logits[:, -1, :]
         probs = F.softmax(next_token_logits,dim=-1)
@@ -323,7 +323,7 @@ def get_surprisal_masked(model,tokenizer,preceding_context,following_words,targe
             context_plus_mask = context_plus_mask + following_words
         model_input_list = context_plus_mask+[tokenizer.eos_token_id]
         mask_idx = model_input_list.index(tokenizer.mask_token_id)
-        input = torch.LongTensor([model_input_list])
+        input = torch.LongTensor([model_input_list]).to("cuda" if torch.cuda.is_available() else "cpu")
         with torch.no_grad():
             next_token_logits = model(input, return_dict=True).logits[:, mask_idx, :]
         probs = F.softmax(next_token_logits,dim=-1)
@@ -391,7 +391,7 @@ def get_surprisal_causal_mask(model,tokenizer,preceding_context,following_words,
             context_plus_mask = context_plus_mask + following_words
         model_input_list = context_plus_mask+[tokenizer.eos_token_id]
         mask_idx = model_input_list.index(tokenizer.mask_token_id)
-        input = torch.LongTensor([model_input_list])
+        input = torch.LongTensor([model_input_list]).to("cuda" if torch.cuda.is_available() else "cpu")
         with torch.no_grad():
             next_token_logits = model(input, return_dict=True).logits[:, mask_idx, :]
         probs = F.softmax(next_token_logits,dim=-1)

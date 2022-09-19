@@ -94,7 +94,7 @@ def run_models(output_directory,model_list,stimulus_file_list):
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     for j in range(len(model_list)):
         model_name = model_list[j]
-        model_name_cleaned = model_name.replace("/","-")
+        model_name_cleaned = model_name.replace("-","_")
         for i in range(len(stimulus_file_list)):
             stimuli_name = stimulus_file_list[i].split('/')[-1].split('.')[0] 
             filename = output_directory + "/" + stimuli_name + "." + "surprisal" + "." + model_name_cleaned + ".causal.output"
