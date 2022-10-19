@@ -28,6 +28,8 @@ def parse_args():
                         help='path to file with list of metrics to caclulate')
     parser.add_argument('--following_context', '-f', action="store_true", default=False,
                         help='whether or not consider the following context with masked language models (default is False)')
+    parser.add_argument('--use_cpu', '-cpu', action="store_true", default=False,
+                        help='use CPU for models even if CUDA is available')
 
     args = parser.parse_args()
     return args
@@ -56,7 +58,12 @@ def process_args(args):
     except:
         print("Error: 'following_context' argument must be Boolean.")
     
-    
+    try:
+        cpu = args.use_cpu
+        assert type(cpu)==bool
+    except:
+        print("Error: 'use_cpu' argument must be Boolean.")
+
     if args.model_list:
         try:
             assert os.path.exists(args.model_list)
@@ -117,9 +124,9 @@ def process_args(args):
         except:
             print("Error: No stimuli specified")  
                 
-    return(output_directory,primary_decoder,include_following_context,model_list,metric_list,stimulus_file_list)  
+    return(output_directory,primary_decoder,include_following_context,model_list,metric_list,stimulus_file_list,cpu)  
 
-def create_and_run_models(model_list,stimulus_file_list,metric_list,primary_decoder,output_directory,include_following_context):
+def create_and_run_models(model_list,stimulus_file_list,metric_list,primary_decoder,output_directory,include_following_context,cpu):
     if primary_decoder == "masked":
         for model_name in model_list:
             
@@ -158,9 +165,9 @@ def create_and_run_models(model_list,stimulus_file_list,metric_list,primary_deco
                 if model and tokenizer:
                     try:
                         if model_type=="causal":
-                            process_stims_causal(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_causal(model.to("cuda" if (torch.cuda.is_available() and not cpu) else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                         elif model_type=="masked":
-                            process_stims_masked(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_masked(model.to("cuda" if (torch.cuda.is_available() and not cpu) else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                     except:
                         print("Cannot run either a masked or causal form of {0}".format(model_name))
             except:
@@ -206,11 +213,11 @@ def create_and_run_models(model_list,stimulus_file_list,metric_list,primary_deco
                 if model and tokenizer:
                     try:
                         if model_type=="causal":
-                            process_stims_causal(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_causal(model.to("cuda" if (torch.cuda.is_available() and not cpu) else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                         elif model_type=="masked":
-                            process_stims_masked(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_masked(model.to("cuda" if (torch.cuda.is_available() and not cpu) else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                         elif model_type=="causal_mask":
-                            process_stims_causal_mask(model.to("cuda" if torch.cuda.is_available() else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
+                            process_stims_causal_mask(model.to("cuda" if (torch.cuda.is_available() and not cpu) else "cpu"),tokenizer,stimulus_file_list,metric_list,model_name_cleaned,output_directory,include_following_context)
                                             
                     except:
                         print("Cannot run either a causal or masked form of {0}".format(model_name))
@@ -255,7 +262,7 @@ def get_surprisal_causal(model,tokenizer,preceding_context,following_words,targe
     all_probabilities = []
     for i in range(len(target_words)):
         current_target = target_words[i]
-        input = torch.LongTensor([current_context]).to("cuda" if torch.cuda.is_available() else "cpu")
+        input = torch.LongTensor([current_context]).to(model.device)
         with torch.no_grad():
             next_token_logits = model(input, return_dict=True).logits[:, -1, :]
         probs = F.softmax(next_token_logits,dim=-1)
@@ -323,7 +330,7 @@ def get_surprisal_masked(model,tokenizer,preceding_context,following_words,targe
             context_plus_mask = context_plus_mask + following_words
         model_input_list = context_plus_mask+[tokenizer.eos_token_id]
         mask_idx = model_input_list.index(tokenizer.mask_token_id)
-        input = torch.LongTensor([model_input_list]).to("cuda" if torch.cuda.is_available() else "cpu")
+        input = torch.LongTensor([model_input_list]).to(model.device)
         with torch.no_grad():
             next_token_logits = model(input, return_dict=True).logits[:, mask_idx, :]
         probs = F.softmax(next_token_logits,dim=-1)
@@ -391,7 +398,7 @@ def get_surprisal_causal_mask(model,tokenizer,preceding_context,following_words,
             context_plus_mask = context_plus_mask + following_words
         model_input_list = context_plus_mask+[tokenizer.eos_token_id]
         mask_idx = model_input_list.index(tokenizer.mask_token_id)
-        input = torch.LongTensor([model_input_list]).to("cuda" if torch.cuda.is_available() else "cpu")
+        input = torch.LongTensor([model_input_list]).to(model.device)
         with torch.no_grad():
             next_token_logits = model(input, return_dict=True).logits[:, mask_idx, :]
         probs = F.softmax(next_token_logits,dim=-1)
@@ -417,8 +424,8 @@ def get_surprisal_causal_mask(model,tokenizer,preceding_context,following_words,
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     args = parse_args()
-    output_directory,primary_decoder,include_following_context,model_list,metric_list,stimulus_file_list = process_args(args)
-    create_and_run_models(model_list,stimulus_file_list,metric_list,primary_decoder,output_directory,include_following_context)
+    output_directory,primary_decoder,include_following_context,model_list,metric_list,stimulus_file_list,cpu = process_args(args)
+    create_and_run_models(model_list,stimulus_file_list,metric_list,primary_decoder,output_directory,include_following_context,cpu)
 
 if __name__ == "__main__":
     main()
