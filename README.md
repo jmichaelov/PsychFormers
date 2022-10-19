@@ -80,13 +80,14 @@ The file itself is a tab-separated values file, with five columns:
 ### Optional Arguments
 * `--following_context` (`-f`): Whether or not to include the following context&mdash;that is, anything following the target&mdash;when calculating surprisal. The default is `False`; including this argument will switch this to `True`. Note that if you include this argument, only the results for masked language models will be affected, as it is not possible for autoregressive (`causal`) models to use the following context for prediction.
 * `--primary_decoder` (`-d`): For models with both `masked` and `causal` versions, specify which one to use as the default&mdash;either `masked` or `causal` (default is `masked`). This is mostly used to select causally-masked versions of masked language models.
+* `--use_cpu` (`-cpu`): Run models on CPU even if CUDA is supported and available.
 
 
 ## PsychFormers for GPT-3
 
 PsychFormers for GPT-3 (`psychformers_gpt3.py`) can be used to calculate surprisal in the same way using GPT-3. The arguments differ in the following way:
-* `--model` (`-m`) OR `-model_list` (`-mm`): uses the name of the specific GPT-3 model as listed in [OpenAI API] rather than the name of the model [HF].
-* `--key` (`-k`): a new argument that allows the user to input their API key from the command-line. An alternative is to add this to the script on line 9. [What about organization?]
+* `--model` (`-m`) OR `-model_list` (`-mm`): uses the name of the specific GPT-3 model as listed in OpenAI API documentation rather than the name of the model on the Hugging Face Model Hub.
+* `--key` (`-k`): a new argument that allows the user to input their API key from the command-line. An alternative is to add this to the script on line 9.
 * Because GPT-3 is an autoregressive (aka `causal`) language model, the `--primary_decoder`(`-d`) and `--following_context` (`-f`) arguments have been removed as possible arguments.
 * Because only `surprisal` is calculated, the `--task` (`-t`) and `--task_list` (`-tt`) arguments have been removed as possible arguments.
 
