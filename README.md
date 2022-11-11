@@ -95,7 +95,7 @@ PsychFormers for GPT-3 (`psychformers_gpt3.py`) can be used to calculate surpris
 Additionally, GPT-3 does not appear to use a beginning-of-sequence (or equivalent) token; thus, it is important to note that it is not possible to calculate the surprisal of the first word in a sequence.
 
 ## Version and Requirements
-Current version: 0.2.0
+Current version: 0.2.1
 
 PsychFormers was written for `Python 3.8` and requires the `pytorch` and `transformers` packages. PsychFormers for GPT-3 also requires the `openai` package and an OpenAI API Key.
 
