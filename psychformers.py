@@ -250,6 +250,15 @@ def process_stims_causal(model,tokenizer,stimulus_file_list,metric_list,model_na
                         preceding_context = [tokenizer.bos_token_id] + preceding_context
                     target_words = encoded_stimulus[dummy_var_idxs[0]+1:dummy_var_idxs[1]]
                     following_words = encoded_stimulus[dummy_var_idxs[1]+1:]
+
+                    if "[!StimulusMarker!] " in stimulus_spaces and tokenizer.decode(target_words)[0]!=" ":
+                        target_words_decoded = " " +tokenizer.decode(target_words)
+                        target_words = tokenizer.encode(target_words_decoded)
+                        if tokenizer.bos_token_id  in target_words:
+                            target_words.remove(tokenizer.bos_token_id)
+                        if tokenizer.eos_token_id  in target_words:
+                            target_words.remove(tokenizer.eos_token_id)
+                            
                     if "surprisal" in metric_list:
                         get_surprisal_causal(model,tokenizer,preceding_context,following_words,target_words,stimuli_name,model_name_cleaned,output_directory,stimulus)
             except:
